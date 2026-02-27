@@ -11,7 +11,6 @@ pipeline {
 
     environment {
         DOCKERHUB_REPO = "khanbibi"
-        IMAGE_TAG = ""
     }
 
     stages {
@@ -19,9 +18,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                script {
-                    env.IMAGE_TAG = "${BUILD_NUMBER}"
-                }
             }
         }
 
@@ -31,7 +27,7 @@ pipeline {
                 stage('Vote') {
                     steps {
                         sh '''
-                            docker build -t $DOCKERHUB_REPO/voting-app-vote:$IMAGE_TAG ./vote
+                            docker build -t $DOCKERHUB_REPO/voting-app-vote:latest ./vote
                         '''
                     }
                 }
@@ -39,7 +35,7 @@ pipeline {
                 stage('Result') {
                     steps {
                         sh '''
-                            docker build -t $DOCKERHUB_REPO/voting-app-result:$IMAGE_TAG ./result
+                            docker build -t $DOCKERHUB_REPO/voting-app-result:latest ./result
                         '''
                     }
                 }
@@ -47,7 +43,7 @@ pipeline {
                 stage('Worker') {
                     steps {
                         sh '''
-                            docker build -t $DOCKERHUB_REPO/voting-app-worker:$IMAGE_TAG ./worker
+                            docker build -t $DOCKERHUB_REPO/voting-app-worker:latest ./worker
                         '''
                     }
                 }
@@ -75,15 +71,12 @@ pipeline {
         stage('Security Scan (Trivy)') {
             steps {
                 sh '''
-                    mkdir -p reports
-
                     docker run --rm \
                       -v /var/run/docker.sock:/var/run/docker.sock \
-                      -v $(pwd)/reports:/reports \
                       aquasec/trivy image \
                       --severity HIGH,CRITICAL \
                       --format table \
-                      $DOCKERHUB_REPO/voting-app-vote:$IMAGE_TAG || true
+                      $DOCKERHUB_REPO/voting-app-vote:latest || true
                 '''
             }
         }
@@ -98,9 +91,9 @@ pipeline {
                     sh '''
                         echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
 
-                        docker push $DOCKERHUB_REPO/voting-app-vote:$IMAGE_TAG
-                        docker push $DOCKERHUB_REPO/voting-app-result:$IMAGE_TAG
-                        docker push $DOCKERHUB_REPO/voting-app-worker:$IMAGE_TAG
+                        docker push $DOCKERHUB_REPO/voting-app-vote:latest
+                        docker push $DOCKERHUB_REPO/voting-app-result:latest
+                        docker push $DOCKERHUB_REPO/voting-app-worker:latest
                     '''
                 }
             }
@@ -123,10 +116,6 @@ pipeline {
     }
 
     post {
-        always {
-            archiveArtifacts artifacts: 'reports/**/*', allowEmptyArchive: true
-        }
-
         success {
             echo "✅ Build successful"
         }
