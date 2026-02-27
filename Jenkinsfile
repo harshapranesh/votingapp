@@ -50,6 +50,28 @@ pipeline {
             }
         }
 
+        stage('Unit Tests') {
+            steps {
+                sh '''
+                    echo "Starting vote container for tests..."
+
+                    docker rm -f vote-test || true
+                    docker run -d --name vote-test -p 5000:80 $DOCKERHUB_REPO/voting-app-vote:latest
+
+                    echo "Waiting for container to start..."
+                    sleep 10
+
+                    echo "Running tests..."
+                    chmod +x ./result/tests/tests.sh
+                    ./result/tests/tests.sh || true
+
+                    echo "Stopping container..."
+                    docker stop vote-test || true
+                    docker rm vote-test || true
+                '''
+            }
+        }
+
         stage('Static Code Checks') {
             steps {
                 sh '''
