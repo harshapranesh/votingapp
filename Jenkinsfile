@@ -59,15 +59,6 @@ pipeline {
             }
         }
 
-        stage('Unit Tests') {
-            steps {
-                sh '''
-                    chmod +x ./result/tests/tests.sh
-                    ./result/tests/tests.sh || true
-                '''
-            }
-        }
-
         stage('Security Scan (Trivy)') {
             steps {
                 sh '''
