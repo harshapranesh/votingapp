@@ -33,19 +33,25 @@ pipeline {
 
                 stage('Vote') {
                     steps {
-                        sh "docker build -t ${DOCKERHUB_REPO}/voting-app-vote:${IMAGE_TAG} ./vote"
+                        sh '''
+                            docker build -t $DOCKERHUB_REPO/voting-app-vote:$IMAGE_TAG ./vote
+                        '''
                     }
                 }
 
                 stage('Result') {
                     steps {
-                        sh "docker build -t ${DOCKERHUB_REPO}/voting-app-result:${IMAGE_TAG} ./result"
+                        sh '''
+                            docker build -t $DOCKERHUB_REPO/voting-app-result:$IMAGE_TAG ./result
+                        '''
                     }
                 }
 
                 stage('Worker') {
                     steps {
-                        sh "docker build -t ${DOCKERHUB_REPO}/voting-app-worker:${IMAGE_TAG} ./worker"
+                        sh '''
+                            docker build -t $DOCKERHUB_REPO/voting-app-worker:$IMAGE_TAG ./worker
+                        '''
                     }
                 }
             }
@@ -80,7 +86,7 @@ pipeline {
                       aquasec/trivy image \
                       --severity HIGH,CRITICAL \
                       --format table \
-                      ${DOCKERHUB_REPO}/voting-app-vote:${IMAGE_TAG} || true
+                      $DOCKERHUB_REPO/voting-app-vote:$IMAGE_TAG || true
                 '''
             }
         }
@@ -92,13 +98,13 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh """
-                        echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
+                    sh '''
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
 
-                        docker push ${DOCKERHUB_REPO}/voting-app-vote:${IMAGE_TAG}
-                        docker push ${DOCKERHUB_REPO}/voting-app-result:${IMAGE_TAG}
-                        docker push ${DOCKERHUB_REPO}/voting-app-worker:${IMAGE_TAG}
-                    """
+                        docker push $DOCKERHUB_REPO/voting-app-vote:$IMAGE_TAG
+                        docker push $DOCKERHUB_REPO/voting-app-result:$IMAGE_TAG
+                        docker push $DOCKERHUB_REPO/voting-app-worker:$IMAGE_TAG
+                    '''
                 }
             }
         }
