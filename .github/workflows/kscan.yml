@@ -38,15 +38,15 @@ jobs:
           SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
         run: |
           ./sysdig-cli-scanner \
-            --apiurl https://secure.us4.sysdig.com \
+            --apiurl https://app.us4.sysdig.com \
             545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_vote:latest
 
           ./sysdig-cli-scanner \
-            --apiurl https://secure.us4.sysdig.com \
+            --apiurl https://app.us4.sysdig.com \
             545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_result:latest
 
           ./sysdig-cli-scanner \
-            --apiurl https://secure.us4.sysdig.com \
+            --apiurl https://app.us4.sysdig.com \
             545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_worker:latest
 
       - name: Push images to ECR
