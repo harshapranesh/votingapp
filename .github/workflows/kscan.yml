@@ -1,0 +1,56 @@
+name: Build and Scan Images
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build images
+        run: |
+          docker build -t 545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_vote:latest ./vote
+          docker build -t 545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_result:latest ./result
+          docker build -t 545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_worker:latest ./worker
+
+      - name: Install Sysdig CLI Scanner
+        run: |
+          curl -LO "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(curl -L -s https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
+          chmod +x sysdig-cli-scanner
+
+      - name: Scan images
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
+          ./sysdig-cli-scanner \
+            --apiurl https://secure.us4.sysdig.com \
+            545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_vote:latest
+
+          ./sysdig-cli-scanner \
+            --apiurl https://secure.us4.sysdig.com \
+            545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_result:latest
+
+          ./sysdig-cli-scanner \
+            --apiurl https://secure.us4.sysdig.com \
+            545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_worker:latest
+
+      - name: Push images to ECR
+        run: |
+          docker push 545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_vote:latest
+          docker push 545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_result:latest
+          docker push 545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_worker:latest
