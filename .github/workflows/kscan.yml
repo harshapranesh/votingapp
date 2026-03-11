@@ -33,7 +33,7 @@ jobs:
           curl -LO "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(curl -L -s https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
           chmod +x sysdig-cli-scanner
 
-      - name: Scan images
+      - name: Scan vote image
         continue-on-error: true
         env:
           SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
@@ -42,10 +42,20 @@ jobs:
             --apiurl https://app.us4.sysdig.com \
             545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_vote:latest
 
+      - name: Scan result image
+        continue-on-error: true
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
           ./sysdig-cli-scanner \
             --apiurl https://app.us4.sysdig.com \
             545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_result:latest
 
+      - name: Scan worker image
+        continue-on-error: true
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
           ./sysdig-cli-scanner \
             --apiurl https://app.us4.sysdig.com \
             545009838166.dkr.ecr.us-east-1.amazonaws.com/examplevotingapp_worker:latest
