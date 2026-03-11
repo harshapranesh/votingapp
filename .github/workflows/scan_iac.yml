@@ -3,8 +3,12 @@ name: Scan IAC
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'k8s-specifications/**'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'k8s-specifications/**'
 
 jobs:
   iac-scan:
@@ -14,17 +18,13 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v3
 
-      - name: Install Sysdig CLI Scanner
-        run: |
-          curl -LO "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(curl -L -s https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
-          chmod +x sysdig-cli-scanner
 
       - name: Scan IAC files
         continue-on-error: true
-        env:
-          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-        run: |
-          ./sysdig-cli-scanner \
-            --apiurl https://app.us4.sysdig.com \
-            --iac \
-            k8s-specifications/
+        uses: sysdiglabs/scan-action@v6
+        with:
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: https://app.us4.sysdig.com
+          cli-scanner-version: 1.9.0
+          mode: iac
+          iac-scan-path: ./k8s-specifications
