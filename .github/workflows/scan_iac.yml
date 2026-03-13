@@ -1,0 +1,28 @@
+name: Scan IAC
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'k8s-specifications/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'k8s-specifications/**'
+
+jobs:
+  iac-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: Scan IAC files
+        uses: sysdiglabs/scan-action@v6
+        with:
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: https://app.us4.sysdig.com
+          cli-scanner-version: 1.9.0
+          mode: iac
+          iac-scan-path: ./k8s-specifications
