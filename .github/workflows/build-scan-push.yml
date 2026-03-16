@@ -44,3 +44,13 @@ jobs:
             docker://${{ secrets.DOCKERHUB_USERNAME }}/voting-${{ matrix.service }}:latest \
             --console-log \
             || true
+
+      - name: Generate SARIF report
+        run: |
+          python3 /path/to/sysdig-to-sarif.py report.json > results.sarif
+
+      - name: Upload scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: results.sarif
