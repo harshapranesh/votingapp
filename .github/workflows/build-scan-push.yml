@@ -25,10 +25,12 @@ jobs:
             ./${{ matrix.service }}
 
       - name: Scan with Sysdig
-        uses: sysdiglabs/scan-action@v5
+        uses: sysdiglabs/scan-action@v6
         with:
           image-tag: ${{ secrets.DOCKERHUB_USERNAME }}/voting-${{ matrix.service }}:latest
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          #commenting out below for testing, uncomment if environment expects no failed policies
+          #stop-on-failed-policy-eval: true
           sysdig-secure-url: https://us4.app.sysdig.com
           stop-on-processing-error: false
 
