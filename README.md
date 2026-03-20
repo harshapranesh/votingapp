@@ -63,3 +63,48 @@ The voting application only accepts one vote per client browser. It does not reg
 This isn't an example of a properly architected perfectly designed distributed app... it's just a simple
 example of the various types of pieces and languages you might see (queues, persistent data, etc), and how to
 deal with them in Docker at a basic level.
+---
+
+## Local Development Setup
+
+### Prerequisites
+
+- Docker Desktop installed
+- Docker Compose installed (comes with Docker Desktop)
+
+Check versions:
+
+```bash
+docker --version
+docker compose version
+```
+---
+
+### Run application locally
+
+From the project root directory run:
+
+```bash
+docker compose up --build
+```
+---
+
+### Application URLs
+
+Vote app:
+http://localhost:8080
+
+Results app:
+http://localhost:8081
+
+---
+
+### Stop the application
+
+```bash
+docker compose down
+```
+---
+### Environment Variables
+
+No additional environment variables are required for local development.

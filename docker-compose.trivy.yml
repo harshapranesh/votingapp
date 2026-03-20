@@ -1,0 +1,31 @@
+# Docker Compose override file for Trivy scanning
+# Run with: docker-compose -f docker-compose.yml -f docker-compose.trivy.yml up
+
+services:
+  trivy-scanner:
+    image: aquasec/trivy:latest
+    container_name: trivy-scanner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}:/scans
+      - ${PWD}/.trivyignore:/.trivyignore
+    entrypoint: /bin/sh
+    command: 
+      - -c
+      - |
+        echo "Scanning images for vulnerabilities..."
+        trivy image --severity HIGH,CRITICAL --exit-code 1 voting-app_vote:latest
+        trivy image --severity HIGH,CRITICAL --exit-code 1 voting-app_result:latest
+        trivy image --severity HIGH,CRITICAL --exit-code 1 voting-app_worker:latest
+        echo "Scanning filesystem..."
+        trivy fs --severity HIGH,CRITICAL --exit-code 1 /scans
+        echo "Scan complete. Check results above."
+    depends_on:
+      - vote
+      - result
+      - worker
+    networks:
+      - front-tier
+      - back-tier
+    profiles:
+      - scan

@@ -1,0 +1,3 @@
+# Trivy vulnerability ignore file
+# Add CVE IDs to ignore specific vulnerabilities
+# Format: CVE-YYYY-XXXXX
