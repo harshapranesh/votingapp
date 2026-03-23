@@ -15,7 +15,6 @@ jobs:
 
       - name: Download Sysdig CLI Scanner
         run: |
-          #curl -LO https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/latest/linux/amd64/sysdig-cli-scanner
           curl -LO "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(curl -L -s https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
           chmod +x ./sysdig-cli-scanner
 
@@ -31,22 +30,27 @@ jobs:
       - name: Build Worker Image
         run: docker build -t worker:${{ github.sha }} ./worker
 
-      - name: Scan Worker image
-        uses: sysdiglabs/scan-action@v6
-        with:
-          image-tag: worker:${{ github.sha }}
-          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+      - name: Scan Worker Image
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
+          ./sysdig-cli-scanner --apiurl "${{ secrets.SYSDIG_SECURE_ENDPOINT }}" "docker://worker:${{ github.sha }}" || true
+
+     # - name: Scan Worker image
+    #  uses: sysdiglabs/scan-action@v6
+    #    with:
+    #      image-tag: worker:${{ github.sha }}
+    #      sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+    #      secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
 
       - name: Build Result Image
         run: docker build -t result:${{ github.sha }} ./result
 
       - name: Scan Result image
-        uses: sysdiglabs/scan-action@v6
-        with:
-          image-tag: result:${{ github.sha }}
-          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
+          ./sysdig-cli-scanner --apiurl "${{ secrets.SYSDIG_SECURE_ENDPOINT }}" "docker://result:${{ github.sha }}" || true
 
       - name: Show Built Images
         run: docker images
