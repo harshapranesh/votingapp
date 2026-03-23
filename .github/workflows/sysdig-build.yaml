@@ -54,3 +54,9 @@ jobs:
 
       - name: Show Built Images
         run: docker images
+
+      - name: Scan Kubernetes manifests with Sysdig IaC
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
+         ./sysdig-cli-scanner --iac --apiurl "${{ secrets.SYSDIG_SECURE_ENDPOINT }}" ./k8s-specifications || true
