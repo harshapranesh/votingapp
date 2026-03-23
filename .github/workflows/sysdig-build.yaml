@@ -22,6 +22,7 @@ jobs:
         with:
             image-tag: vote:${{ github.sha }}
             sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+            secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
 
       - name: Build Worker Image
         run: docker build -t worker:${{ github.sha }} ./worker
@@ -31,6 +32,7 @@ jobs:
         with:
             image-tag: worker:${{ github.sha }}
             sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+            secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
 
       - name: Build Result Image
         run: docker build -t result:${{ github.sha }} ./result
@@ -40,6 +42,7 @@ jobs:
         with:
             image-tag: result:${{ github.sha }}
             sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+            secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
 
       - name: Show Built Images
         run: docker images
