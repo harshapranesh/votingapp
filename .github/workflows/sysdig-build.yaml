@@ -1,0 +1,28 @@
+name: Voting App 
+
+on:
+  push:
+    branches: main
+  pull_request:
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Vote Image
+        run: docker build -t vote:${{ github.sha }} ./vote
+
+      - name: Build Worker Image
+        run: docker build -t vote:${{ github.sha }} ./worker
+
+      - name: Build Result Image
+        run: docker build -t vote:${{ github.sha }} ./result
+
+      - name: Show Built Images
+        run: docker images
+
+
