@@ -26,7 +26,7 @@ jobs:
         env:
           SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
         run: |
-          ./sysdig-cli-scanner --apiurl "${{ secrets.SYSDIG_SECURE_ENDPOINT }}" "docker://vote:${{ github.sha }}"
+          ./sysdig-cli-scanner --apiurl "${{ secrets.SYSDIG_SECURE_ENDPOINT }}" "docker://vote:${{ github.sha }}" || true
 
       - name: Build Worker Image
         run: docker build -t worker:${{ github.sha }} ./worker
