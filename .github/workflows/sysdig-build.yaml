@@ -13,16 +13,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Download Sysdig CLI Scanner
+        run: |
+          curl -LO https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/latest/linux/amd64/sysdig-cli-scanner
+          chmod +x ./sysdig-cli-scanner
+
       - name: Build Vote Image
         run: docker build -t vote:${{ github.sha }} ./vote
 
-      - name: Scan Vote image
-        id: scan
-        uses: sysdiglabs/scan-action@v6
-        with:
-          image-tag: vote:${{ github.sha }}
-          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+      - name: Scan vote image
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
+          ./sysdig-cli-scanner \
+            --apiurl "${{ secrets.SYSDIG_SECURE_ENDPOINT }}" \
+            docker://vote:${{ github.sha }}
 
       - name: Build Worker Image
         run: docker build -t worker:${{ github.sha }} ./worker
