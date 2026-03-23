@@ -20,9 +20,9 @@ jobs:
         id: scan
         uses: sysdiglabs/scan-action@v6
         with:
-            image-tag: vote:${{ github.sha }}
-            sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-            secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          image-tag: vote:${{ github.sha }}
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
 
       - name: Build Worker Image
         run: docker build -t worker:${{ github.sha }} ./worker
@@ -30,9 +30,9 @@ jobs:
       - name: Scan Worker image
         uses: sysdiglabs/scan-action@v6
         with:
-            image-tag: worker:${{ github.sha }}
-            sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-            secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          image-tag: worker:${{ github.sha }}
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
 
       - name: Build Result Image
         run: docker build -t result:${{ github.sha }} ./result
@@ -40,11 +40,9 @@ jobs:
       - name: Scan Result image
         uses: sysdiglabs/scan-action@v6
         with:
-            image-tag: result:${{ github.sha }}
-            sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-            secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          image-tag: result:${{ github.sha }}
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
 
       - name: Show Built Images
         run: docker images
-
-
