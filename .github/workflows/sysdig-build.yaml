@@ -1,0 +1,62 @@
+name: Voting App 
+
+on:
+  push:
+    branches: main
+  pull_request:
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Sysdig CLI Scanner
+        run: |
+          curl -LO "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(curl -L -s https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
+          chmod +x ./sysdig-cli-scanner
+
+      - name: Build Vote Image
+        run: docker build -t vote:${{ github.sha }} ./vote
+
+      - name: Scan vote image
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
+          ./sysdig-cli-scanner --apiurl "${{ secrets.SYSDIG_SECURE_ENDPOINT }}" "docker://vote:${{ github.sha }}" || true
+
+      - name: Build Worker Image
+        run: docker build -t worker:${{ github.sha }} ./worker
+
+      - name: Scan Worker Image
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
+          ./sysdig-cli-scanner --apiurl "${{ secrets.SYSDIG_SECURE_ENDPOINT }}" "docker://worker:${{ github.sha }}" || true
+
+     # - name: Scan Worker image
+    #  uses: sysdiglabs/scan-action@v6
+    #    with:
+    #      image-tag: worker:${{ github.sha }}
+    #      sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+    #      secure-api-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+
+      - name: Build Result Image
+        run: docker build -t result:${{ github.sha }} ./result
+
+      - name: Scan Result image
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
+          ./sysdig-cli-scanner --apiurl "${{ secrets.SYSDIG_SECURE_ENDPOINT }}" "docker://result:${{ github.sha }}" || true
+
+      - name: Show Built Images
+        run: docker images
+
+      - name: Scan Kubernetes manifests with Sysdig IaC
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
+         ./sysdig-cli-scanner --iac --apiurl "${{ secrets.SYSDIG_SECURE_ENDPOINT }}" ./k8s-specifications || true
