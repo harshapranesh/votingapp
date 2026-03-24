@@ -58,6 +58,7 @@ pipeline {
             steps {
                 sh """
                     docker rm -f vote-test || true
+                    docker ps -q --filter publish=5000 | xargs -r docker rm -f || true
                     docker run -d --name vote-test -p 5000:80 $DOCKERHUB_REPO/voting-app-vote:latest
 
                     sleep 5
