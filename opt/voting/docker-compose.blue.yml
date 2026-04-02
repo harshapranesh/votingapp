@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  vote:
+    image: khanbibi/voting-app-vote:latest
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "8081:80"
+    networks:
+      - front-tier
+      - back-tier
+
+  result:
+    image: khanbibi/voting-app-result:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8083:80"
+    networks:
+      - front-tier
+      - back-tier
+
+  worker:
+    image: khanbibi/voting-app-worker:latest
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    networks:
+      - back-tier
+
+  redis:
+    image: redis:alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - back-tier
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db-data-blue:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - back-tier
+
+volumes:
+  db-data-blue:
+
+networks:
+  front-tier:
+  back-tier:

@@ -80,7 +80,7 @@ pipeline {
             steps {
                 sh """
                     chmod +x ./run-static-checks.sh
-                    ./run-static-checks.sh || true
+                    ./run-static-checks.sh
                 """
             }
         }
@@ -90,18 +90,17 @@ pipeline {
                 sh """
                     docker run --rm \
                       -v /var/run/docker.sock:/var/run/docker.sock \
-                      aquasec/trivy image --severity HIGH,CRITICAL --format table \
-                      $DOCKERHUB_REPO/voting-app-vote:latest || true
+                      aquasec/trivy image --severity HIGH,CRITICAL --exit-code 1 --format table \
+                      $DOCKERHUB_REPO/voting-app-vote:latest
 
                     docker run --rm \
                       -v /var/run/docker.sock:/var/run/docker.sock \
-                      aquasec/trivy image --severity HIGH,CRITICAL --format table \
-                      $DOCKERHUB_REPO/voting-app-result:latest || true
-
+                      aquasec/trivy image --severity HIGH,CRITICAL --exit-code 1 --format table \
+                      $DOCKERHUB_REPO/voting-app-result:latest
                     docker run --rm \
                       -v /var/run/docker.sock:/var/run/docker.sock \
-                      aquasec/trivy image --severity HIGH,CRITICAL --format table \
-                      $DOCKERHUB_REPO/voting-app-worker:latest || true
+                      aquasec/trivy image --severity HIGH,CRITICAL --exit-code 1 --format table \
+                      $DOCKERHUB_REPO/voting-app-worker:latest
                 """
             }
         }
@@ -126,6 +125,100 @@ pipeline {
                         docker push $DOCKERHUB_REPO/voting-app-worker:$IMAGE_TAG
                     """
                 }
+            }
+        }
+
+        stage('Sync deploy files to EC2') {
+            steps {
+                sshagent(['ec2-ssh']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@98.89.185.95 '
+                            mkdir -p /opt/voting/nginx &&
+                            mkdir -p /opt/voting/scripts
+                        '
+
+                        scp -o StrictHostKeyChecking=no opt/voting/docker-compose.blue.yml ubuntu@98.89.185.95:/opt/voting/
+                        scp -o StrictHostKeyChecking=no opt/voting/docker-compose.green.yml ubuntu@98.89.185.95:/opt/voting/
+                        scp -o StrictHostKeyChecking=no opt/voting/active_color ubuntu@98.89.185.95:/opt/voting/
+                        scp -o StrictHostKeyChecking=no opt/voting/nginx/blue.conf ubuntu@98.89.185.95:/opt/voting/nginx/
+                        scp -o StrictHostKeyChecking=no opt/voting/nginx/green.conf ubuntu@98.89.185.95:/opt/voting/nginx/
+                        scp -o StrictHostKeyChecking=no opt/voting/scripts/smoke_test.sh ubuntu@98.89.185.95:/opt/voting/scripts/
+                        scp -o StrictHostKeyChecking=no opt/voting/scripts/switch_to_blue.sh ubuntu@98.89.185.95:/opt/voting/scripts/
+                        scp -o StrictHostKeyChecking=no opt/voting/scripts/switch_to_green.sh ubuntu@98.89.185.95:/opt/voting/scripts/
+
+                        ssh -o StrictHostKeyChecking=no ubuntu@98.89.185.95 '
+                            chmod +x /opt/voting/scripts/*.sh
+                        '
+                    """
+                }
+            }
+        }
+
+        stage('Detect Active Color') {
+            steps {
+                sshagent(['ec2-ssh']) {
+                    script {
+                        env.ACTIVE_COLOR = sh(
+                            script: "ssh -o StrictHostKeyChecking=no ubuntu@98.89.185.95 'cat /opt/voting/active_color || echo blue'",
+                            returnStdout: true
+                        ).trim()
+
+                        env.INACTIVE_COLOR = env.ACTIVE_COLOR == 'blue' ? 'green' : 'blue'
+                        echo "Active: ${env.ACTIVE_COLOR}, Inactive: ${env.INACTIVE_COLOR}"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sshagent(['ec2-ssh']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@98.89.185.95 '
+                            cd /opt/voting &&
+                            docker compose -f docker-compose.${INACTIVE_COLOR}.yml pull &&
+                            docker compose -f docker-compose.${INACTIVE_COLOR}.yml up -d
+                        '
+                    """
+                }
+            }
+        }
+
+        stage('Smoke Test') {
+            steps {
+                sshagent(['ec2-ssh']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@98.89.185.95 '
+                            /opt/voting/scripts/smoke_test.sh ${INACTIVE_COLOR}
+                        '
+                    """
+                }
+            }
+        }
+
+        stage('Switch Traffic') {
+            steps {
+                sshagent(['ec2-ssh']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@98.89.185.95 '
+                            /opt/voting/scripts/switch_to_${INACTIVE_COLOR}.sh &&
+                            echo ${INACTIVE_COLOR} > /opt/voting/active_color
+                        '
+                    """
+                }
+            }
+        }
+
+        post {
+            failure {
+                sshagent(['ec2-ssh']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no ubuntu@98.89.185.95 "
+                            /opt/voting/scripts/switch_to_${ACTIVE_COLOR}.sh || true
+                        "
+                    '''
+                }
+                echo "Build failed"
             }
         }
 
