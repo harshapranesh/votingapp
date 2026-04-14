@@ -1,0 +1,54 @@
+name: Build and Push to JFrog
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  jfrog-pipeline:
+    runs-on: ubuntu-latest
+    strategy:
+      # This creates 3 parallel builds: one for vote, result, and worker
+      matrix:
+        service: [vote, result, worker]
+    
+    steps:
+      # 1. GIT CLONE
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. SETUP JFROG CLI
+      - name: Set up JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+        env:
+          JF_URL: ${{ secrets.JF_URL }}
+          JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+
+      # 3. DOCKER LOGIN (Handshake between Docker and JFrog)
+      - name: Docker Login to JFrog
+        run: jf docker-login
+
+      # 4. IMAGE CREATE & PUSH
+      - name: Build and Push Service
+        run: |
+          # Define the name: registry/repo/image:tag
+          # Example: myjfrog.io/docker-repo/vote:123
+          IMAGE_NAME="${{ secrets.JF_URL_CLEAN }}/voting-repo/${{ matrix.service }}:${{ github.run_number }}"
+          
+          echo "Processing $IMAGE_NAME"
+
+          # 'jf docker build' handles image creation and metadata collection
+          jf docker build -t $IMAGE_NAME ./${{ matrix.service }} \
+            --build-name=voting-app \
+            --build-number=${{ github.run_number }}
+          
+          # 'jf docker push' sends it to Artifactory
+          jf docker push $IMAGE_NAME \
+            --build-name=voting-app \
+            --build-number=${{ github.run_number }}
+
+      # 5. PUBLISH BUILD INFO (Metadata for JFrog UI)
+      - name: Publish Build Info
+        run: |
+          jf rt build-collect-env voting-app ${{ github.run_number }}
+          jf rt build-publish voting-app ${{ github.run_number }}
