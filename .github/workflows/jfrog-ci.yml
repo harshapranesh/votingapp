@@ -21,8 +21,8 @@ jobs:
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
-          JF_URL: ${{ secrets.JF_URL }}
-          JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+          JFROG_URL: ${{ secrets.JFROG_URL }}
+          JFROG_TOKEN: ${{ secrets.JFROG_TOKEN }}
 
       # 3. DOCKER LOGIN (Handshake between Docker and JFrog)
       - name: Docker Login to JFrog
