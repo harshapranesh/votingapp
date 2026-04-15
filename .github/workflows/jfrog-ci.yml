@@ -38,12 +38,12 @@ jobs:
           docker push ${{ secrets.JF_URL }}/artifactory/docker-trial/result:latest
           docker push ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:latest
 
-      # Deploy
-      - name: Deploy to VM
-        uses: appleboy/ssh-action@v0.1.0
-        with:
-          host: ${{ secrets.VM_IP }}
-          username: ubuntu
-          key: ${{ secrets.VM_SSH_KEY }}
-          script: |
-            kubectl apply -f k8s/
+      # # Deploy
+      # - name: Deploy to VM
+      #   uses: appleboy/ssh-action@v0.1.0
+      #   with:
+      #     host: ${{ secrets.VM_IP }}
+      #     username: ubuntu
+      #     key: ${{ secrets.VM_SSH_KEY }}
+      #     script: |
+      #       kubectl apply -f k8s/
