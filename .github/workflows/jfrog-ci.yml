@@ -3,12 +3,16 @@ name: Build and Push to JFrog
 on:
   push:
     branches: [ "develop" ]
-
 jobs:
   jfrog-pipeline:
     runs-on: ubuntu-latest
+    # Explicitly map secrets to job-level environment variables
+    env:
+      JF_URL: ${{ secrets.JF_URL }}
+      JF_URL_CLEAN: ${{ secrets.JF_URL_CLEAN }}
+      JFROG_TOKEN: ${{ secrets.JFROG_TOKEN }}
+      
     strategy:
-      # This creates 3 parallel builds: one for vote, result, and worker
       matrix:
         service: [vote, result, worker]
     
@@ -21,19 +25,18 @@ jobs:
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
-          JFROG_URL: ${{ secrets.JF_URL }}
-          JFROG_TOKEN: ${{ secrets.JFROG_TOKEN }}
+          JFROG_URL: ${{ env.JF_URL }}
+          JFROG_TOKEN: ${{ env.JFROG_TOKEN }}
 
       # 3. IMAGE CREATE & PUSH
       - name: Build and Push Service
         run: |
-          # Use your specific secret JF_URL_CLEAN
-          # Ensure this secret is set to 'jfrogartifact1.jfrog.io' in GitHub
-          REGISTRY="${{ secrets.JF_URL_CLEAN }}"
+          # Use the environment variable mapped above
+          REGISTRY="${{ env.JF_URL_CLEAN }}"
           
-          # Validation to prevent the CLI 'panic' error if secret is missing
+          # Validation to prevent the CLI 'panic' error
           if [ -z "$REGISTRY" ]; then
-            echo "ERROR: JF_URL_CLEAN is empty. Please check your GitHub Secrets."
+            echo "ERROR: JF_URL_CLEAN is empty. Go to Settings > Secrets and ensure it is set."
             exit 1
           fi
 
@@ -41,17 +44,17 @@ jobs:
           
           echo "Processing $IMAGE_NAME"
 
-          # 'jf docker build' handles image creation and metadata collection
+          # Build and collect metadata
           jf docker build -t "$IMAGE_NAME" ./${{ matrix.service }} \
             --build-name=voting-app \
             --build-number=${{ github.run_number }}
           
-          # 'jf docker push' sends it to Artifactory
+          # Push to Artifactory
           jf docker push "$IMAGE_NAME" \
             --build-name=voting-app \
             --build-number=${{ github.run_number }}
 
-      # 4. PUBLISH BUILD INFO (Metadata for JFrog UI)
+      # 4. PUBLISH BUILD INFO
       - name: Publish Build Info
         run: |
           jf rt build-collect-env voting-app ${{ github.run_number }}
