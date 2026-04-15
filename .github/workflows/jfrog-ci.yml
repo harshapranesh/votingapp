@@ -17,6 +17,10 @@ jobs:
           docker login ${{ secrets.JF_URL }} \
           -u ${{ secrets.JF_USER }} \
           -p ${{ secrets.JF_PASSWORD }}
+          
+      - name: Clean Docker
+        run: |
+          docker system prune -af    
 
       # Build Images
       - name: Build Vote Image
