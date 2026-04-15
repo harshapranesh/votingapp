@@ -38,12 +38,12 @@ jobs:
           echo "Processing $IMAGE_NAME"
 
           # 'jf docker build' handles image creation and metadata collection
-             docker build -t $IMAGE_NAME ./${{ matrix.service }} \
+          jf docker build -t $IMAGE_NAME ./${{ matrix.service }} \
             --build-name=voting-app \
             --build-number=${{ github.run_number }}
           
           # 'jf docker push' sends it to Artifactory
-             docker push $IMAGE_NAME \
+          jf docker push $IMAGE_NAME \
             --build-name=voting-app \
             --build-number=${{ github.run_number }}
 
