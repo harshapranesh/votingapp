@@ -42,19 +42,19 @@ jobs:
           fi
 
           # NEW CORRECTION: Automatically configures Docker authentication using JFrog CLI
-          jf docker-config --global=true
+             docker config --global=true
 
           IMAGE_NAME="$REGISTRY/voting-repo/${{ matrix.service }}:${{ github.run_number }}"
           
           echo "Processing $IMAGE_NAME"
 
           # 'jf docker build' handles image creation and metadata collection
-          jf docker build -t "$IMAGE_NAME" ./${{ matrix.service }} \
+             docker build -t "$IMAGE_NAME" ./${{ matrix.service }} \
             --build-name=voting-app \
             --build-number=${{ github.run_number }}
           
           # 'jf docker push' sends it to Artifactory
-          jf docker push "$IMAGE_NAME" \
+             docker push "$IMAGE_NAME" \
             --build-name=voting-app \
             --build-number=${{ github.run_number }}
 
