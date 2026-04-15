@@ -7,60 +7,53 @@ on:
 jobs:
   jfrog-pipeline:
     runs-on: ubuntu-latest
-    # Mapping secrets to environment variables to ensure visibility
     env:
       JF_URL: ${{ secrets.JF_URL }}
       JF_URL_CLEAN: ${{ secrets.JF_URL_CLEAN }}
       JFROG_TOKEN: ${{ secrets.JFROG_TOKEN }}
+      JFROG_USER: ${{ secrets.JFROG_USER }}
           
     strategy:
       matrix:
         service: [vote, result, worker]
         
     steps:
-      # 1. GIT CLONE
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. SETUP JFROG CLI
       - name: Set up JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
           JFROG_URL: ${{ env.JF_URL }}
           JFROG_TOKEN: ${{ env.JFROG_TOKEN }}
 
-      # 3. IMAGE CREATE & PUSH
+      # Corrected Login Step: Must be its own step and non-interactive
+      - name: Docker Login
+        run: |
+          echo "${{ env.JFROG_TOKEN }}" | docker login ${{ env.JF_URL_CLEAN }} -u ${{ env.JFROG_USER }} --password-stdin
+
+      # Corrected Build Step: Use 'jf docker' to allow the --build-name flags
       - name: Build and Push Service
         run: |
-          # Use the environment variable mapped above
           REGISTRY="${{ env.JF_URL_CLEAN }}"
           
-          # Validation to prevent the CLI 'panic' error if secret is missing
           if [ -z "$REGISTRY" ]; then
-            echo "ERROR: JF_URL_CLEAN is empty. Please check your GitHub Secrets."
+            echo "ERROR: JF_URL_CLEAN is empty."
             exit 1
           fi
 
-          # NEW CORRECTION: Automatically configures Docker authentication using JFrog CLI
-             # 1. Standard Docker Login (Non-interactive)
-      - name: Docker Login
-        run: docker login
-        
           IMAGE_NAME="$REGISTRY/voting-repo/${{ matrix.service }}:${{ github.run_number }}"
-          
           echo "Processing $IMAGE_NAME"
 
-          # 'jf docker build' handles image creation and metadata collection
-             docker build -t "$IMAGE_NAME" ./${{ matrix.service }} \
+          # Use 'jf docker' (not just docker) to support JFrog metadata flags
+          jf docker build -t "$IMAGE_NAME" ./${{ matrix.service }} \
             --build-name=voting-app \
             --build-number=${{ github.run_number }}
           
-          # 'jf docker push' sends it to Artifactory
-             docker push "$IMAGE_NAME" \
+          jf docker push "$IMAGE_NAME" \
             --build-name=voting-app \
             --build-number=${{ github.run_number }}
 
-      # 4. PUBLISH BUILD INFO (Metadata for JFrog UI)
       - name: Publish Build Info
         run: |
           jf rt build-collect-env voting-app ${{ github.run_number }}
