@@ -36,7 +36,7 @@ jobs:
         run: |
           docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/vote:latest ${{ secrets.JF_URL }}/docker-trial/vote:latest
           docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/result:latest ${{ secrets.JF_URL }}/docker-trial/result:latest
-          docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:latest ${{ secrets.JF_URL }}/docker-trial/worked:latest
+          docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:latest ${{ secrets.JF_URL }}/docker-trial/worker:latest
           docker push ${{ secrets.JF_URL }}/docker-trial/vote:latest
           docker push ${{ secrets.JF_URL }}/docker-trial/result:latest
           docker push ${{ secrets.JF_URL }}/docker-trial/worker:latest
