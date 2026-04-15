@@ -45,8 +45,7 @@ jobs:
              # 1. Standard Docker Login (Non-interactive)
       - name: Docker Login
         run: docker login
-          
-
+        
           IMAGE_NAME="$REGISTRY/voting-repo/${{ matrix.service }}:${{ github.run_number }}"
           
           echo "Processing $IMAGE_NAME"
