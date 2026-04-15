@@ -21,7 +21,7 @@ jobs:
       # Build Images
       - name: Build Vote Image
         run: |
-          docker build -t ${{ secrets.JF_URL }}/artifactory/docker-trial/result:latest ./vote
+          docker build -t ${{ secrets.JF_URL }}/artifactory/docker-trial/vote:latest ./vote
 
       - name: Build Result Image
         run: |
