@@ -42,7 +42,11 @@ jobs:
           fi
 
           # NEW CORRECTION: Automatically configures Docker authentication using JFrog CLI
-             echo "${{ secrets.JFROG_TOKEN }}" | docker login ${{ secrets.JF_URL_CLEAN }} -u ${{ secrets.JFROG_USER }} --password-stdin
+             # 1. Standard Docker Login (Non-interactive)
+      - name: Docker Login
+        run: |
+          # Use echo to feed the token to docker login
+          echo "${{ secrets.JFROG_TOKEN }}" | docker login ${{ secrets.JF_URL_CLEAN }} -u ${{ secrets.JFROG_USER }} --password-stdin
 
           IMAGE_NAME="$REGISTRY/voting-repo/${{ matrix.service }}:${{ github.run_number }}"
           
