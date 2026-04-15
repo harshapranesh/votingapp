@@ -34,9 +34,9 @@ jobs:
       # Push Images
       - name: Push Images
         run: |
-          docker push ${{ secrets.JF_URL }}/docker-trial/vote:latest
-          docker push ${{ secrets.JF_URL }}/docker-trial/result:latest
-          docker push ${{ secrets.JF_URL }}/docker-trial/worker:latest
+          docker push ${{ secrets.JF_URL_CLEAN }}/docker-trial/vote:latest
+          docker push ${{ secrets.JF_URL_CLEAN }}/docker-trial/result:latest
+          docker push ${{ secrets.JF_URL_CLEAN }}/docker-trial/worker:latest
 
       # Deploy
       - name: Deploy to VM
