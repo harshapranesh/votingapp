@@ -2,77 +2,37 @@ name: Voting App CI/CD
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [main]
 
 jobs:
-  jfrog-pipeline:
-    runs-on: ubuntu-latest
-    env:
-      JF_URL: ${{ secrets.JF_URL }}
-      JF_URL_CLEAN: ${{ secrets.JF_URL_CLEAN }}
-      JFROG_TOKEN: ${{ secrets.JFROG_TOKEN }}
-      JFROG_USER: ${{ secrets.JFROG_USER }}
-          
-    strategy:
-      matrix:
-        service: [vote, result, worker]
-        
+  build-push-deploy:
+    runs-on: self-hosted
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Set up JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v4
-        env:
-          JFROG_URL: ${{ env.JF_URL }}
-          JFROG_TOKEN: ${{ env.JFROG_TOKEN }}
-
-      # Corrected Login Step: Must be its own step and non-interactive
-      - name: Docker Login
+      # Login JFrog
+      - name: Login to JFrog
         run: |
-          echo "${{ env.JFROG_TOKEN }}" | docker login ${{ env.JF_URL_CLEAN }} -u ${{ env.JFROG_USER }} --password-stdin
-
-      # Corrected Build Step: Use 'jf docker' to allow the --build-name flags
-      - name: Build and Push Service
-        run: |
-          REGISTRY="${{ env.JF_URL_CLEAN }}"
-          
-          if [ -z "$REGISTRY" ]; then
-            echo "ERROR: JF_URL_CLEAN is empty."
-            exit 1
-          fi
-
-          IMAGE_NAME="$REGISTRY/voting-repo/${{ matrix.service }}:${{ github.run_number }}"
-          echo "Processing $IMAGE_NAME"
-
-          # Use 'jf docker' (not just docker) to support JFrog metadata flags
-          jf docker build -t "$IMAGE_NAME" ./${{ matrix.service }} \
-            --build-name=voting-app \
-            --build-number=${{ github.run_number }}
-          
-          jf docker push "$IMAGE_NAME" \
-            --build-name=voting-app \
-            --build-number=${{ github.run_number }}
-
-      - name: Publish Build Info
+          docker login ${{ secrets.JF_URL }} \
+          -u ${{ secrets.JF_USER }} \
+          -p ${{ secrets.JF_PASSWORD }}
+      # Build Images
+      - name: Build Vote Image
         run: |
           docker build -t ${{ secrets.JF_URL }}/docker-trial/vote:latest ./vote
-
       - name: Build Result Image
         run: |
           docker build -t ${{ secrets.JF_URL }}/docker-trial/result:latest ./result
-
       - name: Build Worker Image
         run: |
           docker build -t ${{ secrets.JF_URL }}/docker-trial/worker:latest ./worker
-
       # Push Images
       - name: Push Images
         run: |
           docker push ${{ secrets.JF_URL }}/docker-trial/vote:latest
           docker push ${{ secrets.JF_URL }}/docker-trial/result:latest
           docker push ${{ secrets.JF_URL }}/docker-trial/worker:latest
-
       # # Deploy
       # - name: Deploy to VM
       #   uses: appleboy/ssh-action@v0.1.0
