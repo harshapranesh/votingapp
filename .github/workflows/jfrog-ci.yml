@@ -7,6 +7,8 @@ on:
 jobs:
   jfrog-pipeline:
     runs-on: ubuntu-latest
+    env:
+      JFROG_REGISTRY: ${{ secrets.JF_URL_CLEAN }}
     strategy:
       # This creates 3 parallel builds: one for vote, result, and worker
       matrix:
@@ -33,7 +35,7 @@ jobs:
         run: |
           # Define the name: registry/repo/image:tag
           # Example: myjfrog.io/docker-repo/vote:123
-          IMAGE_NAME="${{ secrets.JF_URL_CLEAN }}/voting-repo/${{ matrix.service }}:${{ github.run_number }}"
+          IMAGE_NAME="$JFROG_REGISTRY/voting-repo/${{ matrix.service }}:${{ github.run_number }}"
           
           echo "Processing $IMAGE_NAME"
 
