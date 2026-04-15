@@ -1,41 +1,49 @@
 name: Voting App CI/CD
+
 on:
-push:
-branches: [main]
+  push:
+    branches: [main]
+
 jobs:
-build-push-deploy:
-runs-on: ubuntu-latest
-steps:
-- name: Checkout
- uses: actions/checkout@v3
-# Login JFrog
-- name: Login to JFrog
- run: |
-   docker login ${{ secrets.JF_URL }} \
-   -u ${{ secrets.JF_USER }} \
-   -p ${{ secrets.JF_PASSWORD }}
-# Build Images
-- name: Build Vote Image
- run: |
-   docker build -t ${{ secrets.JF_URL }}/docker-local/vote:latest ./vote
-- name: Build Result Image
- run: |
-   docker build -t ${{ secrets.JF_URL }}/docker-local/result:latest ./result
-- name: Build Worker Image
- run: |
-   docker build -t ${{ secrets.JF_URL }}/docker-local/worker:latest ./worker
-# Push Images
-- name: Push Images
- run: |
-   docker push ${{ secrets.JF_URL }}/docker-local/vote:latest
-   docker push ${{ secrets.JF_URL }}/docker-local/result:latest
-   docker push ${{ secrets.JF_URL }}/docker-local/worker:latest
-# Deploy
-- name: Deploy to VM
- uses: appleboy/ssh-action@v0.1.0
- with:
-   host: ${{ secrets.VM_IP }}
-   username: ubuntu
-   key: ${{ secrets.VM_SSH_KEY }}
-   script: |
-     kubectl apply -f k8s/
+  build-push-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Login JFrog
+      - name: Login to JFrog
+        run: |
+          docker login ${{ secrets.JF_URL }} \
+          -u ${{ secrets.JF_USER }} \
+          -p ${{ secrets.JF_PASSWORD }}
+
+      # Build Images
+      - name: Build Vote Image
+        run: |
+          docker build -t ${{ secrets.JF_URL }}/docker-local/vote:latest ./vote
+
+      - name: Build Result Image
+        run: |
+          docker build -t ${{ secrets.JF_URL }}/docker-local/result:latest ./result
+
+      - name: Build Worker Image
+        run: |
+          docker build -t ${{ secrets.JF_URL }}/docker-local/worker:latest ./worker
+
+      # Push Images
+      - name: Push Images
+        run: |
+          docker push ${{ secrets.JF_URL }}/docker-local/vote:latest
+          docker push ${{ secrets.JF_URL }}/docker-local/result:latest
+          docker push ${{ secrets.JF_URL }}/docker-local/worker:latest
+
+      # Deploy
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v0.1.0
+        with:
+          host: ${{ secrets.VM_IP }}
+          username: ubuntu
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            kubectl apply -f k8s/
