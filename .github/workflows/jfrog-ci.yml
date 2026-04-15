@@ -17,30 +17,26 @@ jobs:
           docker login ${{ secrets.JF_URL }} \
           -u ${{ secrets.JF_USER }} \
           -p ${{ secrets.JF_PASSWORD }}
-          
-      - name: Clean Docker
-        run: |
-          docker system prune -af    
 
       # Build Images
       - name: Build Vote Image
         run: |
-          docker build -t ${{ secrets.JF_URL }}/docker-trial/vote:latest ./vote
+          docker build -t ${{ secrets.JF_URL }}/artifactory/docker-trial/vote:latest ./vote
 
       - name: Build Result Image
         run: |
-          docker build -t ${{ secrets.JF_URL }}/docker-trial/result:latest ./result
+          docker build -t ${{ secrets.JF_URL }}/artifactory/docker-trial/result:latest ./result
 
       - name: Build Worker Image
         run: |
-          docker build -t ${{ secrets.JF_URL }}/docker-trial/worker:latest ./worker
+          docker build -t ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:latest ./worker
 
       # Push Images
       - name: Push Images
         run: |
-          docker push ${{ secrets.JF_URL }}/docker-trial/vote:latest
-          docker push ${{ secrets.JF_URL }}/docker-trial/result:latest
-          docker push ${{ secrets.JF_URL }}/docker-trial/worker:latest
+          docker push ${{ secrets.JF_URL }}/artifactory/docker-trial/vote:latest
+          docker push ${{ secrets.JF_URL }}/artifactory/docker-trial/result:latest
+          docker push ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:latest
 
       # Deploy
       - name: Deploy to VM
