@@ -3,19 +3,20 @@ name: Build and Push to JFrog
 on:
   push:
     branches: [ "develop" ]
+
 jobs:
   jfrog-pipeline:
     runs-on: ubuntu-latest
-    # Explicitly map secrets to job-level environment variables
+    # Mapping secrets to environment variables to ensure visibility
     env:
       JF_URL: ${{ secrets.JF_URL }}
       JF_URL_CLEAN: ${{ secrets.JF_URL_CLEAN }}
       JFROG_TOKEN: ${{ secrets.JFROG_TOKEN }}
-      
+          
     strategy:
       matrix:
         service: [vote, result, worker]
-    
+        
     steps:
       # 1. GIT CLONE
       - name: Checkout code
@@ -34,27 +35,30 @@ jobs:
           # Use the environment variable mapped above
           REGISTRY="${{ env.JF_URL_CLEAN }}"
           
-          # Validation to prevent the CLI 'panic' error
+          # Validation to prevent the CLI 'panic' error if secret is missing
           if [ -z "$REGISTRY" ]; then
-            echo "ERROR: JF_URL_CLEAN is empty. Go to Settings > Secrets and ensure it is set."
+            echo "ERROR: JF_URL_CLEAN is empty. Please check your GitHub Secrets."
             exit 1
           fi
+
+          # NEW CORRECTION: Automatically configures Docker authentication using JFrog CLI
+          jf docker-config --global=true
 
           IMAGE_NAME="$REGISTRY/voting-repo/${{ matrix.service }}:${{ github.run_number }}"
           
           echo "Processing $IMAGE_NAME"
 
-          # Build and collect metadata
+          # 'jf docker build' handles image creation and metadata collection
           jf docker build -t "$IMAGE_NAME" ./${{ matrix.service }} \
             --build-name=voting-app \
             --build-number=${{ github.run_number }}
           
-          # Push to Artifactory
+          # 'jf docker push' sends it to Artifactory
           jf docker push "$IMAGE_NAME" \
             --build-name=voting-app \
             --build-number=${{ github.run_number }}
 
-      # 4. PUBLISH BUILD INFO
+      # 4. PUBLISH BUILD INFO (Metadata for JFrog UI)
       - name: Publish Build Info
         run: |
           jf rt build-collect-env voting-app ${{ github.run_number }}
