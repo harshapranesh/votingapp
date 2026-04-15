@@ -1,4 +1,4 @@
-name: Build and Push to JFrog
+name: Voting App CI/CD
 
 on:
   push:
@@ -56,5 +56,29 @@ jobs:
 
       - name: Publish Build Info
         run: |
-          jf rt build-collect-env voting-app ${{ github.run_number }}
-          jf rt build-publish voting-app ${{ github.run_number }}
+          docker build -t ${{ secrets.JF_URL }}/docker-trial/vote:latest ./vote
+
+      - name: Build Result Image
+        run: |
+          docker build -t ${{ secrets.JF_URL }}/docker-trial/result:latest ./result
+
+      - name: Build Worker Image
+        run: |
+          docker build -t ${{ secrets.JF_URL }}/docker-trial/worker:latest ./worker
+
+      # Push Images
+      - name: Push Images
+        run: |
+          docker push ${{ secrets.JF_URL }}/docker-trial/vote:latest
+          docker push ${{ secrets.JF_URL }}/docker-trial/result:latest
+          docker push ${{ secrets.JF_URL }}/docker-trial/worker:latest
+
+      # # Deploy
+      # - name: Deploy to VM
+      #   uses: appleboy/ssh-action@v0.1.0
+      #   with:
+      #     host: ${{ secrets.VM_IP }}
+      #     username: ubuntu
+      #     key: ${{ secrets.VM_SSH_KEY }}
+      #     script: |
+      #       kubectl apply -f k8s/
