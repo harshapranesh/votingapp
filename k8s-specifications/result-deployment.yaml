@@ -15,7 +15,7 @@ spec:
         app: result
     spec:
       containers:
-      - image: jfrogartifact1.jfrog.io/artifactory/docker-trial/result
+      - image: jfrogartifact1.jfrog.io/docker-trial/result
         name: result
         ports:
         - containerPort: 80
