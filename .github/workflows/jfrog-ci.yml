@@ -42,4 +42,7 @@ jobs:
           docker push ${{ secrets.JF_URL }}/docker-trial/worker:latest
 
       # Deploy
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s-specifications/
      
