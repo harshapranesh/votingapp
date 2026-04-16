@@ -18,4 +18,4 @@ spec:
       - image: jfrogartifact1.jfrog.io/artifactory/docker-trial/worker
         name: worker
     imagePullSecrets:
-      - name: jfrog-cred
+    - name: jfrog-cred
