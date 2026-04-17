@@ -45,6 +45,6 @@ jobs:
       # Deploy
       - name: Deploy to Kubernetes
         run: |
-          kubectl create namespace vote
-          kubectl apply -f k8s-specifications/ -n vote
+      - name: Create namespace if not exists
+        run: kubectl create namespace vote || true
      
