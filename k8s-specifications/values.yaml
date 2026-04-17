@@ -1,0 +1,35 @@
+replicaCount: 1
+
+image:
+  vote:
+    repository: harshapranesh/vote
+    tag: latest
+    pullPolicy: IfNotPresent
+  result:
+    repository: harshapranesh/result
+    tag: latest
+    pullPolicy: IfNotPresent
+  worker:
+    repository: harshapranesh/worker
+    tag: latest
+    pullPolicy: IfNotPresent
+  redis:
+    repository: redis
+    tag: 7
+    pullPolicy: IfNotPresent
+
+service:
+  vote:
+    type: ClusterIP
+    port: 80
+  result:
+    type: ClusterIP
+    port: 5000
+  redis:
+    type: ClusterIP
+    port: 6379
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
