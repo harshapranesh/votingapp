@@ -9,9 +9,9 @@ replicaCount: 1
 image:
   repository: jfrogartifact1.jfrog.io/docker-trial/vote
   # This sets the pull policy for images.
-  pullPolicy: 
+    pullPolicy: Always 
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
