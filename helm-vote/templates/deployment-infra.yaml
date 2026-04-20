@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "helm-vote.fullname" . }}
+  name: {{ include "helm-infra.fullname" . }}
   labels:
-    {{- include "helm-vote.labels" . | nindent 4 }}
+    {{- include "helm-infra.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "helm-vote.selectorLabels" . | nindent 6 }}
+      {{- include "helm-infra.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -27,7 +27,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "helm-vote.serviceAccountName" . }}
+      serviceAccountName: {{ include "helm-infra.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
