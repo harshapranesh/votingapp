@@ -20,5 +20,5 @@ spec:
         ports:
         - containerPort: 80
           name: result
-      imagePullSecrets:
+      imagePullSecrets: Always
       - name: jfrog-cred
