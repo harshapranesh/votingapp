@@ -51,5 +51,5 @@ jobs:
 
       - name: Trigger Deployment Restart
         run: |
-          kubectl rollout restart deployment/vote-deployment -n vote
+          kubectl rollout restart deployment/vote -n vote
      
