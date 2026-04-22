@@ -30,7 +30,9 @@ jobs:
       - name: Build Worker Image
         run: |
           docker build -t ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:latest ./worker
-
+      - name: Build number
+        run: |
+            echo "${{ github.run_number }}"
       # Push Images
       - name: Push Images
         run: |
