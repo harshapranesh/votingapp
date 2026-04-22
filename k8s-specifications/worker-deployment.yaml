@@ -17,5 +17,5 @@ spec:
       containers:
       - image: jfrogartifact1.jfrog.io/docker-trial/worker
         name: worker
-      imagePullSecrets:
+      imagePullSecrets: Always
       - name: jfrog-cred
