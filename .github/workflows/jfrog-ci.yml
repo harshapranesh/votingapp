@@ -36,9 +36,9 @@ jobs:
       # Push Images
       - name: Push Images
         run: |
-          docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/vote:latest ${{ secrets.JF_URL }}/artifactory/docker-trial/vote:${{ github.run_number }} ${{ secrets.JF_URL }}/docker-trial/vote:latest
-          docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/result:latest ${{ secrets.JF_URL }}/docker-trial/result:latest ${{ secrets.JF_URL }}/artifactory/docker-trial/result:${{ github.run_number }}
-          docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:latest ${{ secrets.JF_URL }}/docker-trial/worker:latest ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:${{ github.run_number }}
+          docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/vote:latest ${{ secrets.JF_URL }}/artifactory/docker-trial/vote:${{ github.run_number }} 
+          docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/result:latest ${{ secrets.JF_URL }}/artifactory/docker-trial/result:${{ github.run_number }}
+          docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:latest  ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:${{ github.run_number }}
           docker push ${{ secrets.JF_URL }}/docker-trial/vote:latest ${{ secrets.JF_URL }}/artifactory/docker-trial/vote:${{ github.run_number }}
           docker push ${{ secrets.JF_URL }}/docker-trial/result:latest ${{ secrets.JF_URL }}/artifactory/docker-trial/result:${{ github.run_number }}
           docker push ${{ secrets.JF_URL }}/docker-trial/worker:latest ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:${{ github.run_number }}
