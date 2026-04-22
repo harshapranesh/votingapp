@@ -48,4 +48,8 @@ jobs:
         run: |
       - name: Create namespace if not exists
         run: kubectl create namespace vote || true
+
+      - name: Trigger Deployment Restart
+        run: |
+          kubectl rollout restart deployment/vote-deployment -n vote
      
