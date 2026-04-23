@@ -12,6 +12,10 @@ spec:
       labels:
         app: vote
     spec:
+      # --- ADDED IMAGE PULL STEP START ---
+      imagePullSecrets:
+        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
+      # --- ADDED IMAGE PULL STEP END ---
       containers:
       - name: vote
         image: {{ .Values.images.vote }}
