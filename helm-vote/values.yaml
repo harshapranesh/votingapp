@@ -1,7 +1,7 @@
 # Replica counts
 replicas:
-  vote: 2
-  result: 2
+  vote: 1
+  result: 1
   worker: 1
   redis: 1
   db: 1
