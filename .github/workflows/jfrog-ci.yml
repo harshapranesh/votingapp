@@ -52,11 +52,7 @@ jobs:
       - name: Trigger Deployment Restart
         run: |
           #kubectl rollout restart deployment/vote -n vote
-          #helm lint ./helm-vote
-          #helm install voting-app ./helm-vote --atomic
-          rm helm-vote/templates/_helpers.tpl
-          git add .   
-          git commit -m "Removing helper for clean slate"
-          git add .
-          git commit -m "Fresh _helpers.tpl with worker aliases"
-          git push origin main
+          helm lint ./helm-vote
+          helm install voting-app ./helm-vote --atomic
+          
+          
