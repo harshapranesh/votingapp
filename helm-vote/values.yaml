@@ -1,18 +1,40 @@
-# Replica Settings
+# Replica counts
 replicas:
   vote: 2
-  result: 1
+  result: 2
   worker: 1
+  redis: 1
+  db: 1
 
-# Image Registry
+# Image Registry (Using your JFrog Artifactory)
 images:
-  vote: jfrogartifact1.jfrog.io/artifactory/docker-trial/vote
-  result: jfrogartifact1.jfrog.io/artifactory/docker-trial/result
-  worker: jfrogartifact1.jfrog.io/artifactory/docker-trial/worker
+  vote: jfrogartifact1.jfrog.io/docker-trial/vote
+  result: jfrogartifact1.jfrog.io/docker-trial/result
+  worker: jfrogartifact1.jfrog.io/docker-trial/worker
   redis: redis:alpine
   db: postgres:15-alpine
 
-# Ingress & HPA Toggles
+# Service configurations
+services:
+  vote:
+    type: LoadBalancer
+    port: 80
+  result:
+    type: LoadBalancer
+    port: 80
+  redis:
+    type: ClusterIP
+    port: 6379
+  db:
+    type: ClusterIP
+    port: 5432
+
+# Database Credentials
+postgres:
+  user: postgres
+  password: password
+
+# Networking & Scaling
 ingress:
   enabled: true
   host: voting-app.local
