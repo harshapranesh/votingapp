@@ -15,7 +15,7 @@ spec:
         app: db
     spec:
       containers:
-      - image: {{ Values.image.repository }}
+       replicas: {{ .Values.replicas.redis }}
         name: postgres
         env:
         - name: POSTGRES_USER
