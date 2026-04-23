@@ -6,6 +6,11 @@ replicas:
   redis: 1
   db: 1
 
+# Global settings for secrets
+global:
+  imagePullSecrets:
+    - name: jfrog-cred
+
 # Image Registry
 images:
   vote: jfrogartifact1.jfrog.io/artifactory/docker-trial/vote
@@ -34,10 +39,6 @@ postgres:
   user: postgres
   password: postgres
 
-# Global settings for secrets
-global:
-  imagePullSecrets:
-    - name: secret
 
 # --- LINTING FIXES (MUST BE LEFT-ALIGNED) ---
 
