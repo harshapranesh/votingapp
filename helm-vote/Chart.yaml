@@ -4,5 +4,4 @@ description: A Helm chart for the microservices voting application
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
-# Adding an icon avoids the 'icon is recommended' warning during linting
 icon: https://raw.githubusercontent.com/docker/docker.github.io/master/images/logos/docker-logo-white.png
