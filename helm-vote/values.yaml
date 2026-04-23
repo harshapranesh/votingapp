@@ -32,7 +32,7 @@ services:
 # Database Credentials
 postgres:
   user: postgres
-  password: password
+  password: postgres
 
 # Networking & Scaling
 ingress:
