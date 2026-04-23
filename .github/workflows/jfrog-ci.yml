@@ -47,7 +47,7 @@ jobs:
         run: |
           #kubectl rollout restart deployment/vote -n vote
            helm upgrade --install voting-app ./helm-vote \
-           --namespace vote \
+           --namespace voting \
            --create-namespace \
            --atomic
           
