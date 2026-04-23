@@ -14,11 +14,10 @@ spec:
       labels:
         app: result
     spec:
-      # 1. Added imagePullSecrets from your global values
-      {{- with .Values.global.imagePullSecrets }}
+      # --- ADDED IMAGE PULL STEP START ---
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
+      # --- ADDED IMAGE PULL STEP END ---
       containers:
       - name: result
         image: {{ .Values.images.result }}
@@ -35,12 +34,12 @@ kind: Service
 metadata:
   name: result
 spec:
-  # 2. Made the Service Type dynamic based on values.yaml
-  type: {{ .Values.services.result.type | default "ClusterIP" }}
+  type: LoadBalancer
   ports:
-  - port: {{ .Values.services.result.port | default 80 }}
+  - port: 80
     targetPort: 80
-    {{- if and (eq .Values.services.result.type "NodePort") .Values.services.result.nodePort }}
+    # Optional: If you want a specific port for local testing
+    {{- if .Values.services.result.nodePort }}
     nodePort: {{ .Values.services.result.nodePort }}
     {{- end }}
   selector:
