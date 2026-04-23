@@ -14,10 +14,10 @@ spec:
       labels:
         app: worker
     spec:
-      {{- with .Values.global.imagePullSecrets }}
+      # --- ADDED IMAGE PULL STEP START ---
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
+      # --- ADDED IMAGE PULL STEP END ---
       containers:
         - name: worker
           image: {{ .Values.images.worker }}
