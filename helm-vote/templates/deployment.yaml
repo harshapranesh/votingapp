@@ -1,78 +1,44 @@
+{{- range $name, $image := .Values.images }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "helm-vote.fullname" . }}
-  labels:
-    {{- include "helm-vote.labels" . | nindent 4 }}
+  name: {{ $name }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  replicas: {{ index $.Values.replicas $name | default 1 }}
   selector:
     matchLabels:
-      {{- include "helm-vote.selectorLabels" . | nindent 6 }}
+      app: {{ $name }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "helm-vote.labels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        app: {{ $name }}
     spec:
-      {{- with .Values.imagePullSecrets }}
+      # Required for private JFrog repo
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "helm-vote.serviceAccountName" . }}
-      {{- with .Values.podSecurityContext }}
-      securityContext:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        - name: jfrog-secret
       containers:
-        - name: {{ .Chart.Name }}
-          {{- with .Values.securityContext }}
-          securityContext:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          {{- with .Values.livenessProbe }}
-          livenessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.readinessProbe }}
-          readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.resources }}
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.volumeMounts }}
-          volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.volumes }}
-      volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      - name: {{ $name }}
+        image: {{ $image }}
+        {{- if or (eq $name "vote") (eq $name "result") }}
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+        {{- end }}
+        env:
+        {{- if eq $name "db" }}
+        - name: POSTGRES_USER
+          value: {{ $.Values.postgres.user | quote }}
+        - name: POSTGRES_PASSWORD
+          value: {{ $.Values.postgres.password | quote }}
+        {{- end }}
+        {{- if eq $name "worker" }}
+        - name: REDIS_HOST
+          value: "redis"
+        - name: POSTGRES_USER
+          value: {{ $.Values.postgres.user | quote }}
+        - name: POSTGRES_PASSWORD
+          value: {{ $.Values.postgres.password | quote }}
+        {{- end }}
+---
+{{- end }}
