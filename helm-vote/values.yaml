@@ -33,6 +33,10 @@ services:
 postgres:
   user: postgres
   password: postgres
+  
+ global:
+  imagePullSecrets:
+    - name: secret
 
 # Networking & Scaling
 ingress:
