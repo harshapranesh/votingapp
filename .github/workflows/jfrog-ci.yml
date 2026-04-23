@@ -52,4 +52,7 @@ jobs:
       - name: Trigger Deployment Restart
         run: |
           kubectl rollout restart deployment/vote -n vote
+          helm lint ./helm-vote
+          helm install --dry-run --debug voting-test ./helm-vote
+          helm install voting-app ./helm-vote
      
