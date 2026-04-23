@@ -39,6 +39,11 @@ global:
   imagePullSecrets:
     - name: secret
 
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
 # Networking & Scaling
 ingress:
   enabled: true
