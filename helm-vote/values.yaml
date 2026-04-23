@@ -6,7 +6,7 @@ replicas:
   redis: 1
   db: 1
 
-# Image Registry (Using your JFrog Artifactory)
+# Image Registry
 images:
   vote: jfrogartifact1.jfrog.io/docker-trial/vote
   result: jfrogartifact1.jfrog.io/docker-trial/result
@@ -39,8 +39,8 @@ global:
   imagePullSecrets:
     - name: secret
 
-# --- FIXES FOR LINTING ERRORS ---
-# These blocks must exist if the files exist in /templates
+# --- LINTING FIXES (MUST BE LEFT-ALIGNED) ---
+
 serviceAccount:
   create: false
   name: ""
@@ -48,7 +48,6 @@ serviceAccount:
 httpRoute:
   enabled: false
 
-# Networking & Scaling
 ingress:
   enabled: true
   host: voting-app.local
