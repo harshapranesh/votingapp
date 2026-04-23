@@ -46,7 +46,9 @@ jobs:
       - name: Trigger Deployment Restart
         run: |
           #kubectl rollout restart deployment/vote -n vote
-           helm lint ./helm-vote
-           helm install voting-app ./helm-vote --atomic
+           helm upgrade --install voting-app ./helm-vote \
+           --namespace vote \
+           --create-namespace \
+           --atomic
           
           
