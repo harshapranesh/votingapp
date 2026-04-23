@@ -52,6 +52,10 @@ jobs:
       - name: Trigger Deployment Restart
         run: |
           kubectl rollout restart deployment/vote -n vote
+          rm -f helm-vote/templates/serviceaccount.yaml
+          git rm helm-vote/templates/serviceaccount.yaml
+          git commit -m "FIX: Explicitly remove serviceaccount.yaml to clear nil pointer error"
+          git push origin main
           helm lint ./helm-vote
           helm install --dry-run --debug voting-test ./helm-vote
           helm install voting-app ./helm-vote
