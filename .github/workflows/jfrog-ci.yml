@@ -43,12 +43,6 @@ jobs:
           docker push ${{ secrets.JF_URL }}/docker-trial/result:latest
           docker push ${{ secrets.JF_URL }}/docker-trial/worker:latest
 
-      # Deploy
-      - name: Deploy to Kubernetes
-        run: |
-      - name: Create namespace if not exists
-        run: kubectl create namespace vote || true
-
       - name: Trigger Deployment Restart
         run: |
           #kubectl rollout restart deployment/vote -n vote
