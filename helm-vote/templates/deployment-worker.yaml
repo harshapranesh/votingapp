@@ -1,20 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "helm-vote.fullname" . }}-worker
-  labels:
-    {{- include "helm-vote.labels" . | nindent 4 }}
-    app: worker
+  name: {{ .Release.Name }}-worker
 spec:
   replicas: {{ .Values.replicas.worker }}
   selector:
     matchLabels:
-      {{- include "helm-vote.selectorLabels" . | nindent 6 }}
       app: worker
   template:
     metadata:
       labels:
-        {{- include "helm-vote.labels" . | nindent 8 }}
         app: worker
     spec:
       {{- with .Values.global.imagePullSecrets }}
@@ -24,7 +19,7 @@ spec:
       containers:
         - name: worker
           image: {{ .Values.images.worker }}
-          imagePullPolicy: IfNotPresent
-          # Worker usually doesn't need ports or probes as it's a background process
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
