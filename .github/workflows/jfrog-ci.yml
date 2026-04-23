@@ -52,7 +52,8 @@ jobs:
       - name: Trigger Deployment Restart
         run: |
           #kubectl rollout restart deployment/vote -n vote
-           helm lint ./helm-vote
-           helm install voting-app ./helm-vote --atomic
+           git add helm-vote/templates/deployment-infra.yaml
+           git commit -m "FIX: Corrected indentation and context for infra deployment"
+           git push origin main
           
           
