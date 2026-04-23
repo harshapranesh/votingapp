@@ -47,3 +47,19 @@ Create chart name and version as used by the chart label.
 {{- define "helm-vote.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Alias for worker deployment compatibility 
+This maps "helm-worker" calls to your "helm-vote" logic
+*/}}
+{{- define "helm-worker.fullname" -}}
+{{- include "helm-vote.fullname" . -}}
+{{- end -}}
+
+{{- define "helm-worker.labels" -}}
+{{- include "helm-vote.labels" . -}}
+{{- end -}}
+
+{{- define "helm-worker.selectorLabels" -}}
+{{- include "helm-vote.selectorLabels" . -}}
+{{- end -}}
