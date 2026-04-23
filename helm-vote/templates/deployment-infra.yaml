@@ -1,11 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: db
   labels:
     app: db
-  name: db
 spec:
-  replicas: 1
+  # Replicas belong here, not inside containers
+  replicas: {{ .Values.replicas.db }}
   selector:
     matchLabels:
       app: db
@@ -15,19 +16,42 @@ spec:
         app: db
     spec:
       containers:
-       replicas: {{ .Values.replicas.redis }}
-        name: postgres
-        env:
-        - name: POSTGRES_USER
-          value: postgres
-        - name: POSTGRES_PASSWORD
-          value: postgres
-        ports:
-        - containerPort: 5432
-          name: postgres
-        volumeMounts:
-        - mountPath: /var/lib/postgresql/data
-          name: db-data
+        - name: postgres
+          image: {{ .Values.images.db }}
+          env:
+            - name: POSTGRES_USER
+              value: {{ .Values.postgres.user | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgres.password | quote }}
+          ports:
+            - containerPort: 5432
+              name: postgres
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: db-data
       volumes:
-      - name: db-data
-        emptyDir: {} 
+        - name: db-data
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  replicas: {{ .Values.replicas.redis }}
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: {{ .Values.images.redis }}
+          ports:
+            - containerPort: 6379
+              name: redis
