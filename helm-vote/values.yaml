@@ -8,9 +8,9 @@ replicas:
 
 # Image Registry (Using your JFrog Artifactory)
 images:
-  vote: jfrogartifact1.jfrog.io/docker-trial/vote:latest
-  result: jfrogartifact1.jfrog.io/docker-trial/result:latest
-  worker: jfrogartifact1.jfrog.io/docker-trial/worker:latest
+  vote: jfrogartifact1.jfrog.io/docker-trial/vote
+  result: jfrogartifact1.jfrog.io/docker-trial/result
+  worker: jfrogartifact1.jfrog.io/docker-trial/worker
   redis: redis:alpine
   db: postgres:15-alpine
 
@@ -38,6 +38,15 @@ postgres:
 global:
   imagePullSecrets:
     - name: secret
+
+# --- FIXES FOR LINTING ERRORS ---
+# These blocks must exist if the files exist in /templates
+serviceAccount:
+  create: false
+  name: ""
+
+httpRoute:
+  enabled: false
 
 # Networking & Scaling
 ingress:
