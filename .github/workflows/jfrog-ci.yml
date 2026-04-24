@@ -18,30 +18,32 @@ jobs:
           -u ${{ secrets.JF_USER }} \
           -p ${{ secrets.JF_PASSWORD }}
 
-      # Build Images
-      - name: Build Vote Image
+       # 1. Build Images with the correct Final Tag
+      - name: Build and Tag Images
         run: |
-          docker build -t ${{ secrets.JF_URL }}/artifactory/docker-trial/vote:latest ./vote
+          docker build -t ${{ secrets.JF_URL }}/docker-trial/vote:${{ github.run_number }} ./vote
+          docker build -t ${{ secrets.JF_URL }}/docker-trial/result:${{ github.run_number }} ./result
+          docker build -t ${{ secrets.JF_URL }}/docker-trial/worker:${{ github.run_number }} ./worker
+          
+          # Also tag as latest for convenience
+          docker tag ${{ secrets.JF_URL }}/docker-trial/vote:${{ github.run_number }} ${{ secrets.JF_URL }}/docker-trial/vote:latest
+          docker tag ${{ secrets.JF_URL }}/docker-trial/result:${{ github.run_number }} ${{ secrets.JF_URL }}/docker-trial/result:latest
+          docker tag ${{ secrets.JF_URL }}/docker-trial/worker:${{ github.run_number }} ${{ secrets.JF_URL }}/docker-trial/worker:latest
 
-      - name: Build Result Image
+      # 2. Push Images
+      - name: Push Images
         run: |
-          docker build -t ${{ secrets.JF_URL }}/artifactory/docker-trial/result:latest  ./result
-
-      - name: Build Worker Image
-        run: |
-          docker build -t ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:latest  ./worker
+          docker push ${{ secrets.JF_URL }}/docker-trial/vote:${{ github.run_number }}
+          docker push ${{ secrets.JF_URL }}/docker-trial/vote:latest
+          docker push ${{ secrets.JF_URL }}/docker-trial/result:${{ github.run_number }}
+          docker push ${{ secrets.JF_URL }}/docker-trial/result:latest
+          docker push ${{ secrets.JF_URL }}/docker-trial/worker:${{ github.run_number }}
+          docker push ${{ secrets.JF_URL }}/docker-trial/worker:latest
+      
       - name: Build number
         run: |
             echo "${{ github.run_number }}"
-      # Push Images
-      - name: Push Images
-        run: |
-          docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/vote:latest ${{ secrets.JF_URL }}/docker-trial/vote:latest
-          docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/result:latest ${{ secrets.JF_URL }}/docker-trial/result:latest
-          docker tag ${{ secrets.JF_URL }}/artifactory/docker-trial/worker:latest ${{ secrets.JF_URL }}/docker-trial/worker:latest
-          docker push ${{ secrets.JF_URL }}/docker-trial/vote:latest
-          docker push ${{ secrets.JF_URL }}/docker-trial/result:latest
-          docker push ${{ secrets.JF_URL }}/docker-trial/worker:latest
+  
 
       - name: Trigger Deployment Restart
         run: |
