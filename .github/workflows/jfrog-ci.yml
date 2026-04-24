@@ -46,6 +46,7 @@ jobs:
       - name: Trigger Deployment Restart
         run: |
           #kubectl rollout restart deployment/vote -n vote
+           kubectl create namespace vote || true
            helm upgrade --install voting-app ./helm-vote \
            --namespace vote \
            --create-namespace \
