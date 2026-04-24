@@ -10,13 +10,13 @@ replicas:
 global:
   imagePullSecrets:
     - name: jfrog-secret
-    - name: vote
+    
 
 # Image Registry
 images:
-  vote: jfrogartifact1.jfrog.io/artifactory/docker-trial/vote
-  result: jfrogartifact1.jfrog.io/artifactory/docker-trial/result
-  worker: jfrogartifact1.jfrog.io/artifactory/docker-trial/worker
+  vote: jfrogartifact1.jfrog.io/docker-trial/vote:latest
+  result: jfrogartifact1.jfrog.io/docker-trial/result:latest
+  worker: jfrogartifact1.jfrog.io/docker-trial/worker:latest
   redis: redis:alpine
   db: postgres:15-alpine
 
