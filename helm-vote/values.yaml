@@ -9,7 +9,8 @@ replicas:
 # Global settings for secrets
 global:
   imagePullSecrets:
-    - name: jfrog-cred
+    - name: jfrog-secret
+    - name: vote
 
 # Image Registry
 images:
